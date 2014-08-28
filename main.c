@@ -5,28 +5,34 @@
 int
 producer(char *r)
 {
-	memcpy(r, "hello", sizeof("hello"));
+	memcpy(r, "hello", strlen("hello"));
 	return 0;
 }
 
 int
 consumer(coroutine_t *c)
 {
-	struct foo {
+	struct {
 		char foo[1000];
-	} *foo;
+	} *v;
 
-	coroutine_define(c, foo);
+	/* code in here will execute every time */
 
-	coroutine_began(c);
+	coroutine_define(c, v);	/* init and allocate sizeof(*v) memory */
 
-	coroutine_yield(c, producer(foo->foo));
-	printf("%s\n", foo->foo);
+	/* code in here will execute every time */
 
-	coroutine_yield(c, producer(foo->foo + strlen(foo->foo)));
-	printf("%s\n", foo->foo);
+	coroutine_began(c);	/* setup coroutine execute switch-case */
 
-	coroutine_ended(c, 0);
+	/* code in here only execute in first time */
+
+	coroutine_yield(c, producer(v->foo));			/* case 1 */
+	printf("%s\n", v->foo);
+
+	coroutine_yield(c, producer(v->foo + strlen(v->foo)));	/* case 2 */
+	printf("%s\n", v->foo);
+
+	coroutine_ended(c, 0);	/* finish up switch-case and release *v */
 }
 
 int
