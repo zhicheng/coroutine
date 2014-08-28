@@ -6,7 +6,5 @@ Demo see main.c
 
 License:
 
-Not Sure
-
-Maybe MIT or Public Domain
+Public Domain
 
