@@ -47,7 +47,7 @@ consumer(coroutine_t *c, char *foo)
 	}
 	coroutine_deinit(c2);
 
-	coroutine_ended(c, 0);	/* finish up switch-case and release *v */
+	coroutine_ended(c, 0);	/* finish up switch-case and release *c2 */
 }
 
 int
