@@ -8,14 +8,24 @@
 
 typedef struct coroutine {
 	int   init;
+	int   finished;
+
 	int   line;
 	void *vars;
 } coroutine_t;
 
+#define coroutine_nodefine(c)					\
+	do {							\
+		if ((c)->init == 0) {				\
+			(c)->init = 1;				\
+			(c)->line = 0;				\
+		}						\
+	} while (0)
+
 #define coroutine_define(c,a)					\
 	do {							\
-		(c)->init = 1;					\
-		if ((c)->vars == NULL) {			\
+		if ((c)->init == 0) {				\
+			(c)->init = 1;				\
 			(c)->line = 0;				\
 			(c)->vars = malloc(sizeof(*(a)));	\
 		}						\
@@ -23,7 +33,7 @@ typedef struct coroutine {
 	} while (0)
 
 #define coroutine_began(c)					\
-	if ((c)->vars != NULL)					\
+	if ((c)->init == 1)					\
 		switch ((c)->line) {				\
 		case 0:
 			
@@ -38,6 +48,7 @@ typedef struct coroutine {
 	do {							\
 		free((c)->vars);				\
 		(c)->vars = NULL;				\
+		(c)->finished = 1;				\
 		return (r);					\
 	} while (0)
 
@@ -45,17 +56,19 @@ typedef struct coroutine {
 	}							\
 	free((c)->vars);					\
 	(c)->vars = NULL;					\
+	(c)->finished = 1;					\
 	return (r)
 
 #define coroutine_init(c)					\
 	do {							\
-		(c)->init = 0;					\
+		(c)->init     = 0;				\
+		(c)->finished = 0;				\
 		(c)->line = 0;					\
 		(c)->vars = NULL;				\
 	} while (0)
 
 #define coroutine_next(c)					\
-	(!(c)->init || ((c)->init && (c)->vars != NULL))
+	(!(c)->finished)
 
 #define coroutine_deinit(c)					\
 	do {							\
